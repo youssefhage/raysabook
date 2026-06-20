@@ -243,13 +243,15 @@ function refreshAddButtons() {
 function sendWhatsApp() {
   const items = [...cart].map(id => BOOKS.find(b => String(b.id) === id)).filter(Boolean);
   if (!items.length) return;
-  let msg = `Hello ${STORE_NAME}! 👋\nI'd like to enquire about the availability and price of the following ${items.length} book${items.length === 1 ? "" : "s"}:\n\n`;
+  const n = items.length;
+  const yearOf = (y) => { const m = (y || "").match(/\d{4}/); return m ? m[0] : (y || ""); };
+  let msg = `*Hello ${STORE_NAME}!*\n\n`;
+  msg += `I'd like to enquire about the availability and price of ${n === 1 ? "this book" : `these ${n} books`}:\n`;
   items.forEach((b, i) => {
-    let line = `${i + 1}. ${b.title}`;
-    if (b.author) line += ` — ${b.author}`;
-    const bits = [b.year, b.format, b.isbn ? "ISBN " + b.isbn : ""].filter(Boolean);
-    if (bits.length) line += ` (${bits.join(", ")})`;
-    msg += line + "\n";
+    msg += `\n${i + 1}. *${b.title}*\n`;
+    const meta = [b.author, yearOf(b.year), b.format].filter(Boolean).join(" · ");
+    if (meta) msg += `    ${meta}\n`;
+    if (b.isbn) msg += `    ISBN ${b.isbn}\n`;
   });
   msg += `\nThank you!`;
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
