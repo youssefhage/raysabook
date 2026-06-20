@@ -1,4 +1,8 @@
-# Ray's Book — online catalog & WhatsApp enquiry storefront
+# RaysABook — online catalog & WhatsApp enquiry storefront
+
+> **🌐 Live site:** https://youssefhage.github.io/raysabook/
+> **📦 Repo:** https://github.com/youssefhage/raysabook
+> Hosted free on GitHub Pages (served from the `gh-pages` branch).
 
 A fast, static storefront for the full **7,566-book** collection extracted from the
 CLZ Cloud library (`cloud.clz.com/joseabou/books`). Visitors browse and search the
@@ -21,18 +25,46 @@ That's the only thing you must change for the site to be live-ready.
 
 ## ▶️ Running / previewing
 
-It's a pure static site (no build step, no server code). Two options:
+It's already live at https://youssefhage.github.io/raysabook/. To run it locally
+(it's a pure static site — no build step, no server code):
 
 - **Double-click** `site/index.html` — it just works (the catalog is loaded as a
   plain `<script>`, so there are no file:// fetch problems).
 - Or serve the folder: `python3 -m http.server 8777 --directory site` and open
   `http://localhost:8777`.
 
-## 🚀 Deploying
+## 🚀 Hosting (live on GitHub Pages)
 
-Upload the **contents of the `site/` folder** to any static host (Netlify, Vercel,
-Cloudflare Pages, GitHub Pages, an S3 bucket, or your Dokploy server). No backend
-required. Cover images are hot-linked from CLZ's public CDN (`clzbooks.r.sizr.io`).
+The site is already deployed **free** on GitHub Pages:
+
+- **`main` branch** — the full project (site source, data, scripts, this README).
+- **`gh-pages` branch** — the published site (the contents of `site/` at its root).
+  GitHub Pages serves this branch at https://youssefhage.github.io/raysabook/.
+
+### Publishing updates
+After editing anything in `site/`, push it live with:
+```bash
+git add -A && git commit -m "update"
+git push origin main                          # save the source
+git subtree push --prefix site origin gh-pages   # publish the site
+```
+Pages rebuilds automatically (~1 minute). No backend, no build step — cover images
+are hot-linked from CLZ's public CDN (`clzbooks.r.sizr.io`).
+
+## 🤝 Handing the project over
+
+You can transfer the whole thing to a new owner with **zero ongoing involvement**:
+
+1. On GitHub → repo **Settings → General → Danger Zone → Transfer ownership**, and
+   enter the new owner's GitHub username. The repo, both branches, and the live site
+   move to them; you're fully out.
+2. After transfer the live URL becomes `https://<new-owner>.github.io/raysabook/`.
+   The new owner should update three things in `site/index.html` to that new address:
+   the `canonical` link and the `og:url` / `og:image` (+ `twitter:image`) tags — this
+   only affects link-preview thumbnails, not the site itself.
+
+Alternatively, the new owner can host it anywhere static (Netlify, Cloudflare Pages,
+Vercel, any web host) — just upload the contents of `site/`.
 
 ## 🗂 Project structure
 
