@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RaysABook — Books &amp; Collectibles</title>
+  <meta name="description" content="Browse the full RaysABook collection — thousands of titles. Add books to your enquiry list and ask about availability and price on WhatsApp.">
+  <meta name="theme-color" content="#2E9AD4">
+
+  <!-- icons & PWA -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <!-- social share preview (Open Graph / Twitter) -->
+  <!-- NOTE: if you TRANSFER the repo to a new owner, update og:url / og:image / canonical
+       below to the new <owner>.github.io/raysabook address (or a custom domain). -->
+  <link rel="canonical" href="https://youssefhage.github.io/raysabook/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RaysABook">
+  <meta property="og:url" content="https://youssefhage.github.io/raysabook/">
+  <meta property="og:title" content="RaysABook — Books &amp; Collectibles">
+  <meta property="og:description" content="Thousands of books, one quiet shelf. Browse the catalog and send your enquiry on WhatsApp.">
+  <meta property="og:image" content="https://youssefhage.github.io/raysabook/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="RaysABook — Books &amp; Collectibles">
+  <meta name="twitter:description" content="Thousands of books, one quiet shelf. Browse the catalog and enquire on WhatsApp.">
+  <meta name="twitter:image" content="https://youssefhage.github.io/raysabook/og.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://clzbooks.r.sizr.io">
+  <link rel="stylesheet" href="styles.css?v=2">
+
+  <!-- shared SVG defs (logo gradient) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="rbGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5EBBE8"/><stop offset="1" stop-color="#1B6699"/>
+    </linearGradient>
+  </defs></svg>
+</head>
+<body>
+
+<header class="site">
+  <div class="bar">
+    <a class="brand" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="RaysABook home">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44" width="40" height="40">
+          <!-- right page -->
+          <path d="M22 13c3.4-2.2 7.6-3.2 12-2.6v21c-4.4-.6-8.6.4-12 2.6V13z" fill="url(#rbGrad)"/>
+          <!-- left page (lighter) -->
+          <path d="M22 13C18.6 10.8 14.4 9.8 10 10.4v21c4.4-.6 8.6.4 12 2.6V13z" fill="url(#rbGrad)" opacity=".55"/>
+          <!-- spine -->
+          <rect x="21" y="12.6" width="2" height="21.8" rx="1" fill="#1B6699"/>
+          <!-- trailing pixels -->
+          <rect x="3.5" y="31" width="4.2" height="4.2" rx="1" fill="#2E9AD4"/>
+          <rect x="2" y="36.2" width="3" height="3" rx=".8" fill="#5EBBE8"/>
+          <rect x="7.2" y="36.6" width="2.4" height="2.4" rx=".6" fill="#2380BC"/>
+        </svg>
+      </span>
+      <span class="nm"><b>Rays<i>A</i>Book</b><span>Books &amp; Collectibles</span></span>
+    </a>
+
+    <div class="searchwrap">
+      <svg class="ic" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="search" placeholder="Search title, author, ISBN or publisher" autocomplete="off">
+      <button class="clr" title="Clear" aria-label="Clear search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <kbd class="slash">/</kbd>
+    </div>
+
+    <button class="cartbtn" id="cartOpen" aria-label="Open enquiry list">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-1.2 9.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 6z"/><path d="M9 6V5a3 3 0 0 1 6 0v1"/></svg>
+      <span class="lbl">Enquiry</span>
+      <span class="count zero" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <span class="eyebrow">The complete catalog</span>
+      <h1>Thousands of books,<br>one quiet shelf.</h1>
+      <p>Browse <b id="statTotal">…</b> carefully kept titles spanning decades and languages. Add the ones you’re after to your enquiry list — we’ll take it from there on WhatsApp, personally, with availability and price.</p>
+      <div class="hero-meta">
+        <span><b id="statTotal2"></b> titles</span>
+        <i></i>
+        <span>Worldwide enquiries</span>
+        <i></i>
+        <span>Replies on WhatsApp</span>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <span class="ha-glow"></span>
+      <svg viewBox="0 0 44 44" width="220" height="220" class="ha-mark">
+        <path d="M22 13c3.4-2.2 7.6-3.2 12-2.6v21c-4.4-.6-8.6.4-12 2.6V13z" fill="url(#rbGrad)"/>
+        <path d="M22 13C18.6 10.8 14.4 9.8 10 10.4v21c4.4-.6 8.6.4 12 2.6V13z" fill="url(#rbGrad)" opacity=".5"/>
+        <rect x="21" y="12.6" width="2" height="21.8" rx="1" fill="#1B6699"/>
+        <rect x="3.5" y="31" width="4.2" height="4.2" rx="1" fill="#2E9AD4"/>
+        <rect x="2" y="36.2" width="3" height="3" rx=".8" fill="#5EBBE8"/>
+        <rect x="7.2" y="36.6" width="2.4" height="2.4" rx=".6" fill="#2380BC"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar-wrap">
+  <div class="toolbar">
+    <div class="selctl"><select id="fSort">
+      <option value="title">Title · A–Z</option>
+      <option value="author">Author</option>
+      <option value="year_desc">Newest first</option>
+      <option value="year_asc">Oldest first</option>
+    </select></div>
+    <div class="selctl"><select id="fFormat"><option value="">All formats</option></select></div>
+    <div class="selctl"><select id="fGenre"><option value="">All genres</option></select></div>
+    <div class="selctl"><select id="fDecade"><option value="">All decades</option></select></div>
+    <div class="spacer"></div>
+    <div class="resultcount" id="resultCount"></div>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<main class="grid" id="grid"></main>
+<button class="morebtn" id="more" style="display:none">Load more</button>
+<div class="sentinel" id="sentinel"></div>
+<div class="empty" id="empty" style="display:none">
+  <div class="big">Nothing matches that search</div>
+  <div>Try a different keyword, or clear the filters above.</div>
+</div>
+
+<footer class="site">
+  <div class="fin">
+    <div class="fcol">
+      <span class="logo-mark sm" aria-hidden="true">
+        <svg viewBox="0 0 44 44" width="28" height="28">
+          <path d="M22 13c3.4-2.2 7.6-3.2 12-2.6v21c-4.4-.6-8.6.4-12 2.6V13z" fill="url(#rbGrad)"/>
+          <path d="M22 13C18.6 10.8 14.4 9.8 10 10.4v21c4.4-.6 8.6.4 12 2.6V13z" fill="url(#rbGrad)" opacity=".5"/>
+          <rect x="3.5" y="31" width="4.2" height="4.2" rx="1" fill="#2E9AD4"/>
+        </svg>
+      </span>
+      <span><b>RaysABook</b> — a catalog of <span id="statTotal3"></span> titles.</span>
+    </div>
+    <span class="muted">© <span id="yearNow"></span> RaysABook · Enquiries handled personally via WhatsApp.</span>
+  </div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Enquiry list">
+  <div class="dh">
+    <h2 id="cartTitle">Enquiry</h2>
+    <button class="x" id="cartClose" title="Close" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="ditems" id="ditems"></div>
+  <div class="dfoot">
+    <p class="note">No online payment. This opens WhatsApp with your list so we can confirm availability &amp; price.</p>
+    <button class="wa" id="waBtn">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01A9.82 9.82 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.82 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm4.71 10.13c-.26-.13-1.51-.74-1.74-.83-.23-.08-.4-.13-.57.13-.17.26-.65.83-.8 1-.15.17-.29.19-.54.06-.26-.13-1.08-.4-2.06-1.27-.76-.68-1.27-1.52-1.42-1.78-.15-.26-.02-.4.11-.53.12-.12.26-.31.39-.46.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.57-1.38-.78-1.89-.21-.5-.42-.43-.57-.44-.15-.01-.32-.01-.49-.01-.17 0-.45.06-.68.32-.23.26-.89.87-.89 2.12 0 1.25.91 2.46 1.04 2.63.13.17 1.79 2.74 4.34 3.84.61.26 1.08.42 1.45.54.61.19 1.16.16 1.6.1.49-.07 1.51-.62 1.72-1.21.21-.6.21-1.11.15-1.21-.06-.11-.23-.17-.49-.3z"/></svg>
+      Send enquiry on WhatsApp
+    </button>
+    <button class="clear" id="clearCart">Clear list</button>
+  </div>
+</aside>
+
+<!-- Detail modal -->
+<div class="modal" id="modal">
+  <div class="mbox">
+    <button class="mclose" id="mClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="mcover" id="mCover"></div>
+    <div class="mbody">
+      <h3 id="mTitle"></h3>
+      <div class="by" id="mBy"></div>
+      <dl id="mMeta"></dl>
+      <button class="add add-lg" id="mAdd">Add to enquiry</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="books.js?v=1"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
