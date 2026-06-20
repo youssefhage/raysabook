@@ -1,0 +1,12 @@
+{
+  "name": "RaysABook — Books & Collectibles",
+  "short_name": "RaysABook",
+  "description": "Browse thousands of books and send your enquiry on WhatsApp.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2E9AD4",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{margin:0;padding:0;overflow:hidden;background:#0a2333}
+  .card{
+    width:1200px;height:630px;position:relative;display:flex;flex-direction:column;justify-content:center;
+    padding:0 96px;color:#fff;font-family:"Inter",sans-serif;
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgba(94,187,232,.35), transparent 55%),
+      linear-gradient(135deg,#0f3a57,#0a2333 70%);
+  }
+  .brand{display:flex;align-items:center;gap:18px;margin-bottom:44px}
+  .brand .nm{font-weight:800;font-size:38px;letter-spacing:-.02em}
+  .brand .nm i{font-style:normal;color:#5EBBE8}
+  .eyebrow{font-size:18px;letter-spacing:.26em;text-transform:uppercase;color:#7fc4ea;font-weight:600;margin-bottom:24px}
+  h1{font-family:"Fraunces",serif;font-weight:600;font-size:82px;line-height:1.02;letter-spacing:-.015em;max-width:820px}
+  .meta{margin-top:40px;display:flex;align-items:center;gap:20px;font-size:24px;color:#cfe3ef;font-weight:500}
+  .meta b{color:#fff;font-weight:700}
+  .meta i{width:6px;height:6px;border-radius:50%;background:#3c6c89;display:inline-block}
+  .pill{position:absolute;right:96px;bottom:64px;display:flex;align-items:center;gap:12px;
+    background:#25D366;color:#fff;font-weight:700;font-size:22px;padding:16px 26px;border-radius:999px}
+  .mark{position:absolute;right:60px;top:54px;opacity:.92;filter:drop-shadow(0 24px 50px rgba(0,0,0,.4))}
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="mark" viewBox="0 0 44 44" width="230" height="230">
+      <defs><linearGradient id="rb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fcdf0"/><stop offset="1" stop-color="#2E9AD4"/></linearGradient></defs>
+      <path d="M22 13c3.4-2.2 7.6-3.2 12-2.6v21c-4.4-.6-8.6.4-12 2.6V13z" fill="url(#rb)"/>
+      <path d="M22 13C18.6 10.8 14.4 9.8 10 10.4v21c4.4-.6 8.6.4 12 2.6V13z" fill="url(#rb)" opacity=".55"/>
+      <rect x="21" y="12.6" width="2" height="21.8" rx="1" fill="#0a2333"/>
+      <rect x="3.5" y="31" width="4.2" height="4.2" rx="1" fill="#5EBBE8"/>
+      <rect x="2" y="36.2" width="3" height="3" rx=".8" fill="#9ad6f3"/>
+      <rect x="7.2" y="36.6" width="2.4" height="2.4" rx=".6" fill="#3aa0d8"/>
+    </svg>
+    <div class="brand"><span class="nm">Rays<i>A</i>Book</span></div>
+    <div class="eyebrow">The complete catalog</div>
+    <h1>Thousands of books, one quiet shelf.</h1>
+    <div class="meta"><span><b>7,566</b> titles</span><i></i><span>Decades &amp; languages</span><i></i><span>Worldwide enquiries</span></div>
+    <div class="pill">Enquire on WhatsApp</div>
+  </div>
+</body>
+</html>
