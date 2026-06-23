@@ -8,13 +8,40 @@
 // Example for +961 70 123 456  ->  "96170123456"
 const WHATSAPP_NUMBER = "9613345683";   // +961 3 345683
 const STORE_NAME = "RaysABook";
-const COVER_BASE = "https://clzbooks.r.sizr.io";
 /* ================================= */
 
 const PAGE = 60;                 // items rendered per chunk
 const CART_KEY = "raysbook_cart_v1";
 
-const BOOKS = (window.BOOKS || []).map((b, i) => ({ ...b, _i: i }));
+/* Supabase (public config from config.js) */
+const SB_URL = window.SB_URL;
+const SB_KEY = window.SB_KEY;
+const COVER_BASE = SB_URL + "/storage/v1/object/public/covers/";
+
+let BOOKS = [];   // populated from Supabase on load
+
+async function loadBooks() {
+  const headers = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY };
+  const sel = "select=clz_id,title,author,isbn,format,pages,publisher,year,genre,cover_path&order=title.asc";
+  const pageSize = 1000;
+  let from = 0; const all = [];
+  while (true) {
+    const r = await fetch(`${SB_URL}/rest/v1/books?${sel}`, {
+      headers: { ...headers, "Range-Unit": "items", "Range": `${from}-${from + pageSize - 1}` }
+    });
+    const rows = await r.json();
+    if (!Array.isArray(rows) || rows.length === 0) break;
+    all.push(...rows);
+    if (rows.length < pageSize) break;
+    from += pageSize;
+  }
+  BOOKS = all.map((b, i) => ({
+    _i: i, id: b.clz_id, title: b.title || "", author: b.author || "", isbn: b.isbn || "",
+    format: b.format || "", pages: b.pages || "", publisher: b.publisher || "",
+    year: b.year || "", genre: b.genre || "", cover: b.cover_path || ""
+  }));
+  BOOKS.forEach(b => { b._s = norm([b.title, b.author, b.isbn, b.publisher].join(" ")); });
+}
 
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -36,9 +63,6 @@ const ICON = {
   plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
 };
-
-/* search index (precomputed lowercased blob) */
-BOOKS.forEach(b => { b._s = norm([b.title, b.author, b.isbn, b.publisher].join(" ")); });
 
 /* ---------- state ---------- */
 let cart = loadCart();
@@ -282,10 +306,20 @@ function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("s
 /* ---------- wire up ---------- */
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
-function init() {
+async function init() {
+  $("#yearNow").textContent = new Date().getFullYear();
+  const grid = $("#grid");
+  grid.innerHTML = '<div class="loading">Loading the catalog…</div>';
+  try {
+    await loadBooks();
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = '<div class="empty"><div class="big">Couldn’t load the catalog</div><div>Please check your connection and refresh.</div></div>';
+    return;
+  }
+  filtered = BOOKS;
   const totalStr = BOOKS.length.toLocaleString();
   ["#statTotal", "#statTotal2", "#statTotal3"].forEach(id => { const el = $(id); if (el) el.textContent = totalStr; });
-  $("#yearNow").textContent = new Date().getFullYear();
   buildFilters();
   updateCartCount();
   apply();
