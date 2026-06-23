@@ -1,119 +1,84 @@
-# RaysABook — online catalog & WhatsApp enquiry storefront
+# RaysABook — online catalog, admin portal & WhatsApp enquiry
 
-> **🌐 Live site:** https://youssefhage.github.io/raysabook/
-> **📦 Repo:** https://github.com/youssefhage/raysabook
-> Hosted free on GitHub Pages (served from the `gh-pages` branch).
+> **🌐 Website:** https://youssefhage.github.io/raysabook/
+> **🔐 Admin:** https://youssefhage.github.io/raysabook/admin.html
+> **📦 Code repo:** https://github.com/youssefhage/raysabook
 
-A fast, static storefront for the full **7,566-book** collection extracted from the
-CLZ Cloud library (`cloud.clz.com/joseabou/books`). Visitors browse and search the
-catalog, add books to an **enquiry list** (cart), and send the list straight to your
-**WhatsApp** to ask about availability and price. There is no online payment — it's a
-lead/enquiry flow, exactly as requested.
+A storefront for the full **7,566-book** collection. Visitors browse/search the
+catalog and add books to an **enquiry list** that opens a pre-filled **WhatsApp**
+message to **+961 3 345683**. There is no online payment — pricing/availability is
+handled by you over WhatsApp. An **admin portal** lets you add, edit and remove books
+(with cover upload) — no code needed.
 
-## ⚙️ Set your WhatsApp number (required)
+## 🏗 How it's built
 
-Open `site/app.js` and edit the top of the file:
+- **Frontend** (this repo, hosted on GitHub Pages) — static HTML/CSS/vanilla JS, no build step.
+- **Backend: Supabase** (project `raysabook-eu`, **Frankfurt** region) provides:
+  - the **books database** (the catalog — 7,566 rows)
+  - **admin login** (Supabase Auth)
+  - **cover image storage** (6,944 covers, served as WebP thumbnails)
+- The storefront reads live from Supabase, so admin changes appear immediately.
+- **CLZ is no longer used** — the catalog was migrated off it entirely.
 
-```js
-const WHATSAPP_NUMBER = "00000000000";   // <-- put your real number here
+```
+site/                     ← the deployed website (GitHub Pages serves this)
+  index.html              storefront
+  app.js                  storefront logic (reads catalog from Supabase)
+  admin.html / admin.js   admin portal (login + add/edit/remove + cover upload)
+  config.js               Supabase URL + PUBLISHABLE key (safe to be public)
+  styles.css, favicon.svg, og.png, manifest.webmanifest
+data/                     ← one-time migration / setup tools (not deployed)
+  supabase_schema.sql     the database schema (table, security rules, storage policies)
+  import_books.py         imports books.json → Supabase
+  migrate_covers.py       downloads covers → uploads to Supabase storage
+  books.json, covers.json the original extracted data (source of truth for re-imports)
+.secrets/                 ← gitignored: Supabase DB password + secret/publishable keys
 ```
 
-Use the **full international format, digits only** — no `+`, spaces or dashes.
-Example: `+961 70 123 456` → `"96170123456"`.
+## 🔐 Admin portal
 
-That's the only thing you must change for the site to be live-ready.
+- Go to **/admin.html**, sign in with the Supabase user you created
+  (e.g. `admin@raysabook.com` + your password).
+- **Add a book**: fill the form, optionally upload a cover (auto-resized to a small
+  WebP). **Edit / Delete**: search, click a book, change or remove it.
+- Changes are live on the storefront instantly.
+- Security: the public can only *read* the catalog. All writes require admin login
+  (enforced by Supabase Row-Level Security — verified).
 
-## ▶️ Running / previewing
+### Managing admin users
+Add or remove admins in the Supabase dashboard → **Authentication → Users**.
 
-It's already live at https://youssefhage.github.io/raysabook/. To run it locally
-(it's a pure static site — no build step, no server code):
+## 🔧 Editing the catalog directly (optional)
 
-- **Double-click** `site/index.html` — it just works (the catalog is loaded as a
-  plain `<script>`, so there are no file:// fetch problems).
-- Or serve the folder: `python3 -m http.server 8777 --directory site` and open
-  `http://localhost:8777`.
+You normally won't need this — use the admin portal. But the Supabase dashboard
+→ **Table editor → books** lets you edit rows directly, and **Storage → covers**
+holds the cover images.
 
-## 🚀 Hosting (live on GitHub Pages)
+## 🚀 Hosting & deploys
 
-The site is already deployed **free** on GitHub Pages:
-
-- **`main` branch** — the full project (site source, data, scripts, this README).
-- **`gh-pages` branch** — the published site (the contents of `site/` at its root).
-  GitHub Pages serves this branch at https://youssefhage.github.io/raysabook/.
-
-### Publishing updates
-After editing anything in `site/`, push it live with:
+Currently on **GitHub Pages** (branch `gh-pages` serves the `site/` folder).
+To publish frontend changes:
 ```bash
 git add -A && git commit -m "update"
-git push origin main                          # save the source
-git subtree push --prefix site origin gh-pages   # publish the site
+git push origin main
+git subtree push --prefix site origin gh-pages
 ```
-Pages rebuilds automatically (~1 minute). No backend, no build step — cover images
-are hot-linked from CLZ's public CDN (`clzbooks.r.sizr.io`).
+You can move hosting to **Cloudflare Pages** anytime (free, faster) — point it at this
+repo with output dir `site`, or `npx wrangler pages deploy site`. If you change domain,
+update `og:url` / `og:image` / `canonical` in `site/index.html`.
 
-## 🤝 Handing the project over
+## 🤝 Handover to a new owner
 
-You can transfer the whole thing to a new owner with **zero ongoing involvement**:
+Two things transfer, both free and built-in:
+1. **GitHub repo** → repo **Settings → Transfer ownership**.
+2. **Supabase project** → project **Settings → General → Transfer project** to their org.
 
-1. On GitHub → repo **Settings → General → Danger Zone → Transfer ownership**, and
-   enter the new owner's GitHub username. The repo, both branches, and the live site
-   move to them; you're fully out.
-2. After transfer the live URL becomes `https://<new-owner>.github.io/raysabook/`.
-   The new owner should update three things in `site/index.html` to that new address:
-   the `canonical` link and the `og:url` / `og:image` (+ `twitter:image`) tags — this
-   only affects link-preview thumbnails, not the site itself.
+Then the new owner updates `site/config.js` only if the Supabase project URL/key change,
+and re-deploys. The DB password & keys are in `.secrets/` (hand those over securely,
+out-of-band — not via the repo).
 
-Alternatively, the new owner can host it anywhere static (Netlify, Cloudflare Pages,
-Vercel, any web host) — just upload the contents of `site/`.
+## 💡 Notes
 
-## 🗂 Project structure
-
-```
-site/
-  index.html             storefront markup + favicon / social-share meta
-  styles.css             design / layout (premium blue theme)
-  app.js                 search, filters, cart, WhatsApp enquiry  ← WHATSAPP_NUMBER here
-  books.js               the catalog  (window.BOOKS = [...])  — generated
-  favicon.svg            browser tab / home-screen icon (the logo mark)
-  manifest.webmanifest   PWA manifest (add-to-home-screen)
-  og.png                 1200×630 social-share preview image  — generated
-  og.html                source layout used to design og.png
-data/
-  books.json     raw extracted catalog (7,566 records)
-  covers.json    id → cover image path (generated by the harvester)
-  gen_books.py   rebuilds site/books.js from books.json + covers.json
-  gen_og.py      rebuilds site/og.png (the share image)
-```
-
-## 🔗 Share preview (important after deploy)
-
-The site has a branded social-share card (`og.png`) so the link looks
-professional when posted to Instagram bio, WhatsApp, etc. Link previews work
-best with **absolute** URLs — once you have your live domain, update the two
-`og:image` / `twitter:image` tags in `index.html` from `og.png` to
-`https://yourdomain.com/og.png` (and set `og:url` to your homepage).
-
-## 🔁 Regenerating the catalog
-
-If `data/books.json` or `data/covers.json` change, rebuild the site catalog with:
-
-```bash
-python3 data/gen_books.py
-```
-
-## ✨ Features
-
-- Instant search over title, author, ISBN and publisher (accent-insensitive).
-- Filters: format, genre, decade; sorting by title / author / year.
-- Cover images where available; elegant colored "spine" fallback otherwise.
-- Enquiry cart persisted in the browser (localStorage).
-- One-tap **Send enquiry on WhatsApp** — builds a neat numbered message of the
-  selected books (title, author, year, format, ISBN).
-- Detail view per book; fully responsive; ~7.5k books handled smoothly via
-  incremental rendering + infinite scroll.
-
-## Data notes
-
-- Titles 100%, authors ~98%, publisher ~97%, year ~96%, ISBN ~79% complete.
-- The collection is multilingual (largely French, plus English and others).
-- No prices are stored anywhere — pricing is handled by you over WhatsApp.
+- Supabase free tier comfortably covers a small audience (~1,500–2,500 visits/mo).
+  If it ever grows, moving the cover images to Cloudflare R2 removes the limit.
+- Free Supabase projects pause after ~7 days of zero traffic (a live storefront stays active).
