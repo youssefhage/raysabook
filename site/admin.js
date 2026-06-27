@@ -12,6 +12,7 @@ const colorFor = (s) => { let h = 0; for (let i = 0; i < (s || "x").length; i++)
 let editingId = null;        // null = adding
 let editingCoverPath = "";   // existing cover when editing
 let newCoverBlob = null;     // resized blob to upload on save
+let genreTags;               // genre tag-input widget
 
 /* ---------- toast ---------- */
 let toastT;
@@ -86,8 +87,10 @@ $("#edScrim").addEventListener("click", (e) => { if (e.target.id === "edScrim") 
 function setForm(b) {
   $("#f_title").value = b.title || ""; $("#f_author").value = b.author || "";
   $("#f_year").value = b.year || ""; $("#f_format").value = b.format || "";
-  $("#f_genre").value = b.genre || ""; $("#f_publisher").value = b.publisher || "";
+  $("#f_publisher").value = b.publisher || "";
   $("#f_pages").value = b.pages || ""; $("#f_isbn").value = b.isbn || "";
+  if (genreTags) genreTags.set((b.genre || "").split(" | ").map(s => s.trim()).filter(Boolean));
+  isbnHint();
   const prev = $("#coverPrev");
   prev.innerHTML = b.cover_path ? `<img src="${COVERS}${esc(b.cover_path)}">` : "";
 }
@@ -149,9 +152,9 @@ $("#edSave").onclick = async () => {
     }
     const rec = {
       title, author: $("#f_author").value.trim(), year: $("#f_year").value.trim(),
-      format: $("#f_format").value.trim(), genre: $("#f_genre").value.trim(),
+      format: $("#f_format").value.trim(), genre: genreTags.get().join(" | "),
       publisher: $("#f_publisher").value.trim(), pages: $("#f_pages").value.trim(),
-      isbn: $("#f_isbn").value.trim(), cover_path
+      isbn: normIsbn($("#f_isbn").value), cover_path
     };
     if (editingId == null) {
       const { error } = await sb.from("books").insert(rec); if (error) throw error;
@@ -180,4 +183,90 @@ $("#edDelete").onclick = async () => {
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeEditor(); });
 
+/* ---------- autocomplete + tags (keep data clean) ---------- */
+async function suggestField(field, q) { const { data } = await sb.rpc("field_suggestions", { field, q, lim: 10 }); return data || []; }
+async function suggestGenre(q) { const { data } = await sb.rpc("genre_tokens", { q, lim: 14 }); return data || []; }
+
+function sgHTML(items, active) {
+  return items.map((s, i) => `<div class="sg-item${i === active ? " on" : ""}" data-i="${i}"><span>${esc(s.value)}</span><span class="sg-n">${s.freq}</span></div>`).join("");
+}
+
+function attachCombo(input, fetcher) {
+  const wrap = document.createElement("div"); wrap.className = "combo";
+  input.parentNode.insertBefore(wrap, input); wrap.appendChild(input);
+  const box = document.createElement("div"); box.className = "suggest"; box.style.display = "none"; wrap.appendChild(box);
+  let items = [], active = -1, t;
+  const close = () => { box.style.display = "none"; active = -1; };
+  function paint() {
+    if (!items.length) { close(); return; }
+    box.innerHTML = sgHTML(items, active); box.style.display = "block";
+    [...box.children].forEach(el => el.onmousedown = (e) => { e.preventDefault(); choose(+el.dataset.i); });
+  }
+  function choose(i) { if (items[i]) { input.value = items[i].value; close(); input.dispatchEvent(new Event("change")); } }
+  const load = () => { clearTimeout(t); t = setTimeout(async () => { items = await fetcher(input.value.trim()); active = -1; paint(); }, 140); };
+  input.addEventListener("input", load);
+  input.addEventListener("focus", load);
+  input.addEventListener("blur", () => setTimeout(close, 160));
+  input.addEventListener("keydown", (e) => {
+    if (box.style.display === "none") return;
+    if (e.key === "ArrowDown") { active = Math.min(active + 1, items.length - 1); paint(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { active = Math.max(active - 1, 0); paint(); e.preventDefault(); }
+    else if (e.key === "Enter" && active >= 0) { choose(active); e.preventDefault(); }
+    else if (e.key === "Escape") close();
+  });
+}
+
+function makeTags(container, fetcher) {
+  let tags = [];
+  const input = document.createElement("input"); input.className = "tag-input"; input.placeholder = "Add genre…";
+  const box = document.createElement("div"); box.className = "suggest"; box.style.display = "none";
+  container.appendChild(input); container.appendChild(box);
+  let items = [], active = -1, t;
+  const has = (v) => tags.some(x => x.toLowerCase() === v.toLowerCase());
+  const close = () => { box.style.display = "none"; active = -1; };
+  function chips() {
+    [...container.querySelectorAll(".chip")].forEach(c => c.remove());
+    tags.forEach((tg, i) => {
+      const c = document.createElement("span"); c.className = "chip";
+      c.innerHTML = `${esc(tg)} <button type="button" aria-label="Remove">×</button>`;
+      c.querySelector("button").onclick = () => { tags.splice(i, 1); chips(); };
+      container.insertBefore(c, input);
+    });
+  }
+  function add(v) { v = (v || "").trim(); if (v && !has(v)) { tags.push(v); chips(); } input.value = ""; close(); }
+  function paint() {
+    const list = items.filter(s => !has(s.value));
+    if (!list.length) { close(); return; }
+    box.innerHTML = sgHTML(list, active); box.style.display = "block";
+    [...box.children].forEach(el => el.onmousedown = (e) => { e.preventDefault(); add(list[+el.dataset.i].value); input.focus(); });
+  }
+  const load = () => { clearTimeout(t); t = setTimeout(async () => { items = await fetcher(input.value.trim()); active = -1; paint(); }, 140); };
+  input.addEventListener("input", load);
+  input.addEventListener("focus", load);
+  input.addEventListener("blur", () => setTimeout(close, 160));
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(input.value); }
+    else if (e.key === "Backspace" && !input.value && tags.length) { tags.pop(); chips(); }
+    else if (e.key === "Escape") close();
+  });
+  return { get: () => tags.slice(), set: (arr) => { tags = (arr || []).filter(Boolean); chips(); } };
+}
+
+function normIsbn(s) { return (s || "").replace(/[\s-]/g, "").trim(); }
+function isbnHint() {
+  const v = normIsbn($("#f_isbn").value), h = $("#isbnHint");
+  if (!v) { h.textContent = ""; h.className = "hint"; }
+  else if (/^(\d{9}[\dXx]|\d{13})$/.test(v)) { h.textContent = "✓ looks like a valid ISBN"; h.className = "hint ok"; }
+  else { h.textContent = "ISBNs are usually 10 or 13 digits — double-check (you can still save)."; h.className = "hint warn"; }
+}
+
+let widgetsReady = false;
+function initWidgets() {
+  if (widgetsReady) return; widgetsReady = true;
+  document.querySelectorAll("[data-suggest]").forEach(inp => attachCombo(inp, (q) => suggestField(inp.dataset.suggest, q)));
+  genreTags = makeTags($("#f_genre_tags"), suggestGenre);
+  $("#f_isbn").addEventListener("input", isbnHint);
+}
+
+initWidgets();
 refreshAuth();
